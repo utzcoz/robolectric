@@ -24,10 +24,10 @@ import org.robolectric.util.ReflectionHelpers;
 import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
 /**
- * Implementation of {@link MediaCodecList} to return a list of predefined decoders. Four MIME types
+ * Implementation of {@link MediaCodecList} to return a list of predefined codecs. Four MIME types
  * can be added to the list: AAC, Opus, AVC, and VP9. Supported features and configurations, e.g.
- * profile level, color format, audio capabilities, video capabilities, etc., for these decoders are
- * pre-set to values based on on-device software and/or hardware decoder of the corresponding type.
+ * profile level, color format, audio capabilities, video capabilities, etc., for these codecs are
+ * pre-set to values based on on-device software and/or hardware codec of the corresponding type.
  */
 @Implements(value = MediaCodecList.class, minSdk = LOLLIPOP)
 public class ShadowMediaCodecList {
@@ -80,16 +80,44 @@ public class ShadowMediaCodecList {
   public static void addDecoder(String name, String mime) {
     switch (mime) {
       case MediaFormat.MIMETYPE_AUDIO_AAC:
-        mediaCodecInfos.add(createAudioCodecInfo(name, mime));
+        mediaCodecInfos.add(createAudioCodecInfo(name, mime, /* isEncoder= */ false));
         break;
       case MediaFormat.MIMETYPE_AUDIO_OPUS:
-        mediaCodecInfos.add(createAudioCodecInfo(name, mime));
+        mediaCodecInfos.add(createAudioCodecInfo(name, mime, /* isEncoder= */ false));
         break;
       case MediaFormat.MIMETYPE_VIDEO_AVC:
-        mediaCodecInfos.add(createVideoCodecInfo(name, mime));
+        mediaCodecInfos.add(createVideoCodecInfo(name, mime, /* isEncoder= */ false));
         break;
       case MediaFormat.MIMETYPE_VIDEO_VP9:
-        mediaCodecInfos.add(createVideoCodecInfo(name, mime));
+        mediaCodecInfos.add(createVideoCodecInfo(name, mime, /* isEncoder= */ false));
+        break;
+      default:
+        throw new IllegalArgumentException(mime + " is not supported.");
+    }
+  }
+
+  /**
+   * Add a predefined encoder to the list of MediaCodecInfos.
+   *
+   * @param name Encoder name. May need to be the same as "type" in {@link
+   *     ShadowMediaCodec#addEncoder(String, CodecConfig)} if use together.
+   * @param mime one of MIMETYPE_* from {@link MediaFormat}. Throws {@link IllegalArgumentException}
+   *     if the given mime is not supported.
+   */
+  @TargetApi(Q)
+  public static void addEncoder(String name, String mime) {
+    switch (mime) {
+      case MediaFormat.MIMETYPE_AUDIO_AAC:
+        mediaCodecInfos.add(createAudioCodecInfo(name, mime, /* isEncoder= */ true));
+        break;
+      case MediaFormat.MIMETYPE_AUDIO_OPUS:
+        mediaCodecInfos.add(createAudioCodecInfo(name, mime, /* isEncoder= */ true));
+        break;
+      case MediaFormat.MIMETYPE_VIDEO_AVC:
+        mediaCodecInfos.add(createVideoCodecInfo(name, mime, /* isEncoder= */ true));
+        break;
+      case MediaFormat.MIMETYPE_VIDEO_VP9:
+        mediaCodecInfos.add(createVideoCodecInfo(name, mime, /* isEncoder= */ true));
         break;
       default:
         throw new IllegalArgumentException(mime + " is not supported.");
@@ -110,32 +138,34 @@ public class ShadowMediaCodecList {
   protected static MediaCodecInfo getNewCodecInfoAt(int index) {
     return mediaCodecInfos.get(index);
   }
-
   /**
-   * Create a sample {@link MediaCodecInfo} for an audio decoder with the predefined profile levels
+   * Create a sample {@link MediaCodecInfo} for an audio codec with the predefined profile levels
    * for the mime in {@link #CODEC_PROFILE_LEVELS}.
    *
    * @param name codec name
    * @param mime one of MIMETYPE_* from {@link MediaFormat}
+   * @param isEncoder whether this codec is an encoder or a decoder
    */
   @TargetApi(Q)
-  private static MediaCodecInfo createAudioCodecInfo(String name, String mime) {
+  private static MediaCodecInfo createAudioCodecInfo(String name, String mime, boolean isEncoder) {
     return createAudioCodecInfo(
         name,
         mime,
+        isEncoder,
         getCodecProfileLevelArray(CODEC_PROFILE_LEVELS.getOrDefault(mime, new SparseIntArray())));
   }
 
   /**
-   * Create a sample {@link MediaCodecInfo} for an audio decoder.
+   * Create a sample {@link MediaCodecInfo} for an audio codec.
    *
    * @param name codec name
    * @param mime one of MIMETYPE_* from {@link MediaFormat}
+   * @param isEncoder whether this codec is an encoder or a decoder
    * @param profileLevels {@link MediaCodecInfo.CodecProfileLevel} supported by the codec
    */
   @TargetApi(Q)
   private static MediaCodecInfo createAudioCodecInfo(
-      String name, String mime, CodecProfileLevel[] profileLevels) {
+      String name, String mime, boolean isEncoder, CodecProfileLevel[] profileLevels) {
     MediaFormat mediaFormat = getMediaFormat(mime);
 
     CodecCapabilities codecCapabilities =
@@ -150,38 +180,49 @@ public class ShadowMediaCodecList {
         createDefaultAudioCapabilities(codecCapabilities, mediaFormat);
     ReflectionHelpers.setField(codecCapabilities, "mAudioCaps", audioCapabilities);
 
-    return createMediaCodecInfo(name, new CodecCapabilities[] {codecCapabilities}, /* flags= */ 4);
+    int flags = isEncoder ? 1 : 0;
+    return createMediaCodecInfo(name, new CodecCapabilities[] {codecCapabilities}, flags);
   }
 
   /**
-   * Create a sample {@link MediaCodecInfo} for a video decoder with the predefined profile levels
-   * for the mime in {@link #CODEC_PROFILE_LEVELS} and {@link
-   * CodecCapabilities#COLOR_FormatYUV420Flexible} as the default color format.
+   * Create a sample {@link MediaCodecInfo} for a video codec with the predefined profile levels for
+   * the mime in {@link #CODEC_PROFILE_LEVELS} and two color formats - {@link
+   * CodecCapabilities#COLOR_FormatYUV420Flexible} and {@link
+   * CodecCapabilities#COLOR_FormatYUV420Planar}.
    *
    * @param name codec name
    * @param mime one of MIMETYPE_* from {@link MediaFormat}
+   * @param isEncoder whether this codec is an encoder or a decoder
    */
   @TargetApi(Q)
-  private static MediaCodecInfo createVideoCodecInfo(String name, String mime) {
+  private static MediaCodecInfo createVideoCodecInfo(String name, String mime, boolean isEncoder) {
     return createVideoCodecInfo(
         name,
         mime,
+        isEncoder,
         getCodecProfileLevelArray(CODEC_PROFILE_LEVELS.getOrDefault(mime, new SparseIntArray())),
-        new int[] {CodecCapabilities.COLOR_FormatYUV420Flexible});
+        new int[] {
+          CodecCapabilities.COLOR_FormatYUV420Flexible, CodecCapabilities.COLOR_FormatYUV420Planar
+        });
   }
 
   /**
-   * Create a sample {@link MediaCodecInfo} for a video decoder.
+   * Create a sample {@link MediaCodecInfo} for a video codec.
    *
    * @param name codec name
    * @param mime one of MIMETYPE_* from {@link MediaFormat}
+   * @param isEncoder whether this codec is an encoder or a decoder
    * @param profileLevels {@link MediaCodecInfo.CodecProfileLevel} supported by the codec
    * @param colorFormats color formats supported by the codec, refer to {@link CodecCapabilities}
    *     for possible values
    */
   @TargetApi(Q)
   private static MediaCodecInfo createVideoCodecInfo(
-      String name, String mime, CodecProfileLevel[] profileLevels, int[] colorFormats) {
+      String name,
+      String mime,
+      boolean isEncoder,
+      CodecProfileLevel[] profileLevels,
+      int[] colorFormats) {
     MediaFormat mediaFormat = getMediaFormat(mime);
     mediaFormat.setFeatureEnabled(CodecCapabilities.FEATURE_AdaptivePlayback, true);
 
@@ -193,7 +234,8 @@ public class ShadowMediaCodecList {
         createDefaultVideoCapabilities(codecCapabilities, mediaFormat);
     ReflectionHelpers.setField(codecCapabilities, "mVideoCaps", videoCapabilities);
 
-    return createMediaCodecInfo(name, new CodecCapabilities[] {codecCapabilities}, /* flags= */ 10);
+    int flags = isEncoder ? 1 : 0;
+    return createMediaCodecInfo(name, new CodecCapabilities[] {codecCapabilities}, flags);
   }
 
   /** Create a {@link MediaFormat} with the specified mime type. */
