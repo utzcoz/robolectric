@@ -42,7 +42,15 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldCreateActiveBitmap() throws Exception {
+  public void createScaledBitmap_modifiesPixels() {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    bitmap.eraseColor(Color.BLUE);
+    Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, /* filter= */ false);
+    assertThat(scaledBitmap.getPixel(0, 0)).isEqualTo(Color.BLUE);
+  }
+
+  @Test
+  public void shouldCreateActiveBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
     assertThat(bitmap.isRecycled()).isFalse();
     assertThat(bitmap.getPixel(0, 0)).isEqualTo(0);

@@ -1,5 +1,7 @@
 package org.robolectric.shadows;
 
+import static java.awt.image.AffineTransformOp.TYPE_BILINEAR;
+import static java.awt.image.AffineTransformOp.TYPE_NEAREST_NEIGHBOR;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
@@ -8,6 +10,8 @@ import static javax.imageio.ImageIO.createImageInputStream;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +24,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
+import org.robolectric.shadow.api.Shadow;
 
 public class ImageUtil {
   private static final String FORMAT_NAME_JPEG = "jpg";
@@ -80,6 +85,39 @@ public class ImageUtil {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static boolean scaledBitmap(Bitmap src, Bitmap dst, boolean filter) {
+    if (src == null || src.getWidth() == 0 || src.getHeight() == 0 || dst == null) {
+      return false;
+    }
+    BufferedImage before =
+        new BufferedImage(
+            src.getWidth(), src.getHeight(), getBufferedImageType(src.getConfig(), true));
+    for (int x = 0; x < src.getWidth(); x++) {
+      for (int y = 0; y < src.getHeight(); y++) {
+        before.setRGB(x, y, src.getPixel(x, y));
+      }
+    }
+    BufferedImage after =
+        new BufferedImage(
+            src.getWidth(), src.getHeight(), getBufferedImageType(src.getConfig(), true));
+    AffineTransform at = new AffineTransform();
+    at.scale(dst.getWidth() * 1.0f / src.getWidth(), dst.getHeight() * 1.0f / src.getHeight());
+    // See Andriod's Bitmap#createScaledBitmap SDK doc
+    AffineTransformOp scaleOp =
+        new AffineTransformOp(at, filter ? TYPE_BILINEAR : TYPE_NEAREST_NEIGHBOR);
+    after = scaleOp.filter(before, after);
+    ShadowBitmap shadowBitmap = Shadow.extract(dst);
+    boolean isMutable = dst.isMutable();
+    shadowBitmap.setMutable(true);
+    for (int x = 0; x < dst.getWidth() && x < after.getWidth(); x++) {
+      for (int y = 0; y < dst.getHeight() && y < after.getHeight(); y++) {
+        shadowBitmap.setPixel(x, y, after.getRGB(x, y));
+      }
+    }
+    shadowBitmap.setMutable(isMutable);
+    return true;
   }
 
   public static boolean writeToStream(

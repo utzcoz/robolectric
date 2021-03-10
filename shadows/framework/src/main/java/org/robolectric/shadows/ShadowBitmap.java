@@ -264,7 +264,17 @@ public class ShadowBitmap {
     if (shadowBitmap.config == null) {
       shadowBitmap.config = Config.ARGB_8888;
     }
-    shadowBitmap.setPixels(new int[shadowBitmap.getHeight() * shadowBitmap.getWidth()], 0, 0, 0, 0, shadowBitmap.getWidth(), shadowBitmap.getHeight());
+
+    if (!ImageUtil.scaledBitmap(src, scaledBitmap, filter)) {
+      shadowBitmap.setPixels(
+          new int[shadowBitmap.getHeight() * shadowBitmap.getWidth()],
+          0,
+          0,
+          0,
+          0,
+          shadowBitmap.getWidth(),
+          shadowBitmap.getHeight());
+    }
     return scaledBitmap;
   }
 
