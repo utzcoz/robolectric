@@ -31,7 +31,7 @@ import org.robolectric.shadow.api.Shadow;
 @RunWith(AndroidJUnit4.class)
 public class ShadowBitmapTest {
   @Test
-  public void shouldCreateScaledBitmap() throws Exception {
+  public void shouldCreateScaledBitmap() {
     Bitmap originalBitmap = create("Original bitmap");
     Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 200, false);
     assertThat(shadowOf(scaledBitmap).getDescription())
@@ -84,7 +84,7 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldCreateBitmapWithColors() throws Exception {
+  public void shouldCreateBitmapWithColors() {
     int[] colors = new int[] {
         Color.parseColor("#ff0000"), Color.parseColor("#00ff00"), Color.parseColor("#0000ff"),
         Color.parseColor("#990000"), Color.parseColor("#009900"), Color.parseColor("#000099")
@@ -134,14 +134,14 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldCreateMutableBitmap() throws Exception {
+  public void shouldCreateMutableBitmap() {
     Bitmap mutableBitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
     assertThat(mutableBitmap.isMutable()).isTrue();
   }
 
   @Test
   @Config(minSdk = JELLY_BEAN_MR1)
-  public void shouldCreateMutableBitmapWithDisplayMetrics() throws Exception {
+  public void shouldCreateMutableBitmapWithDisplayMetrics() {
     final DisplayMetrics metrics = new DisplayMetrics();
     metrics.densityDpi = 1000;
 
@@ -151,14 +151,14 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldRecycleBitmap() throws Exception {
+  public void shouldRecycleBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
     bitmap.recycle();
     assertThat(bitmap.isRecycled()).isTrue();
   }
 
   @Test
-  public void shouldReceiveDescriptionWhenDrawingToCanvas() throws Exception {
+  public void shouldReceiveDescriptionWhenDrawingToCanvas() {
     Bitmap bitmap1 = create("Bitmap One");
     Bitmap bitmap2 = create("Bitmap Two");
 
@@ -169,7 +169,7 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldReceiveDescriptionWhenDrawingToCanvasWithBitmapAndMatrixAndPaint() throws Exception {
+  public void shouldReceiveDescriptionWhenDrawingToCanvasWithBitmapAndMatrixAndPaint() {
     Bitmap bitmap1 = create("Bitmap One");
     Bitmap bitmap2 = create("Bitmap Two");
 
@@ -181,7 +181,7 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void shouldReceiveDescriptionWhenDrawABitmapToCanvasWithAPaintEffect() throws Exception {
+  public void shouldReceiveDescriptionWhenDrawABitmapToCanvasWithAPaintEffect() {
     Bitmap bitmap1 = create("Bitmap One");
     Bitmap bitmap2 = create("Bitmap Two");
 
@@ -197,7 +197,7 @@ public class ShadowBitmapTest {
   }
 
   @Test
-  public void visualize_shouldReturnDescription() throws Exception {
+  public void visualize_shouldReturnDescription() {
     Bitmap bitmap = create("Bitmap One");
     assertThat(ShadowBitmap.visualize(bitmap))
         .isEqualTo("Bitmap One");
