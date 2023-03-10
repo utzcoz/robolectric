@@ -1,7 +1,6 @@
-import org.robolectric.gradle.AndroidProjectConfigPlugin
+import org.robolectric.gradle.RoboJavaModulePlugin
 
-apply plugin: 'com.android.library'
-apply plugin: AndroidProjectConfigPlugin
+apply plugin: RoboJavaModulePlugin
 apply plugin: "jacoco"
 
 android {
