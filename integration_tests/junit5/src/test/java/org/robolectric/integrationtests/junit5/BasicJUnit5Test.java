@@ -13,10 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricExtension;
+import org.robolectric.RobolectricJUnit5Runner;
 
-/** Basic JUnit5 integration test using {@link RobolectricExtension}. */
-@ExtendWith(RobolectricExtension.class)
+/** Basic JUnit5 integration test using {@link RobolectricJUnit5Runner}. */
+@ExtendWith(RobolectricJUnit5Runner.class)
 public class BasicJUnit5Test {
 
   private Context context;

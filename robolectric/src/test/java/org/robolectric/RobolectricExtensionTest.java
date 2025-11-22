@@ -9,8 +9,8 @@ import androidx.test.core.app.ApplicationProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** Test for {@link RobolectricExtension}. */
-@ExtendWith(RobolectricExtension.class)
+/** Test for {@link RobolectricExtension} and {@link RobolectricJUnit5Runner}. */
+@ExtendWith(RobolectricJUnit5Runner.class)
 public class RobolectricExtensionTest {
 
   @Test

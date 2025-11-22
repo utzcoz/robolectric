@@ -25,6 +25,7 @@ dependencies {
   testImplementation(project(":testapp"))
   testImplementation(project(":robolectric"))
   testImplementation(libs.junit5.jupiter.api)
+  testImplementation(libs.junit5.jupiter.params)
   testRuntimeOnly(libs.junit5.jupiter.engine)
   testImplementation(libs.androidx.test.core)
   testImplementation(libs.androidx.test.ext.junit)
