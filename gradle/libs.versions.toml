@@ -76,6 +76,9 @@ javax-inject = "1"
 # https://junit.org/junit4/
 junit4 = "4.13.2"
 
+# https://junit.org/junit5/
+junit5 = "5.11.4"
+
 # https://github.com/google/libphonenumber/releases
 libphonenumber = "9.0.13"
 
@@ -175,6 +178,12 @@ hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
 
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+
+junit5-bom = { module = "org.junit:junit-bom", version.ref = "junit5" }
+junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+junit5-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit5" }
 
 javax-annotation-api = { module = "javax.annotation:javax.annotation-api", version.ref = "javax-annotation-api" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javax-inject" }

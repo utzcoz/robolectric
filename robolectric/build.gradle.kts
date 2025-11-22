@@ -31,6 +31,7 @@ dependencies {
 
   compileOnly(AndroidSdk.MAX_SDK.coordinates)
   compileOnly(libs.junit4)
+  compileOnly(libs.junit5.jupiter.api)
   compileOnly(libs.androidx.annotation)
 
   api(variantOf(libs.androidx.test.monitor) { artifactType("aar") })
@@ -39,6 +40,8 @@ dependencies {
 
   testImplementation(libs.androidx.annotation)
   testImplementation(libs.junit4)
+  testImplementation(libs.junit5.jupiter.api)
+  testRuntimeOnly(libs.junit5.jupiter.engine)
   testImplementation(libs.truth)
   testImplementation(libs.mockito)
   testImplementation(libs.mockito.subclass)
@@ -51,6 +54,11 @@ dependencies {
   testImplementation(libs.guava.testlib)
   testCompileOnly(AndroidSdk.MAX_SDK.coordinates) // compile against latest Android SDK
   testRuntimeOnly(androidStubsJar())
+}
+
+tasks.withType<Test>().configureEach {
+  // Enable JUnit5 for tests that use it
+  useJUnitPlatform()
 }
 
 fun androidStubsJar(): ConfigurableFileCollection {
